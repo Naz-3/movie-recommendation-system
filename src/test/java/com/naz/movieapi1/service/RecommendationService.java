@@ -92,9 +92,11 @@ class RecommendationServiceTest {
         content.setId(999);
         content.setGenre(genre);
         content.setTitle("Watched " + genre);
-        content.setDurationInMinutes(120); //filmin suresini 120ye sabitlememiz daha kisa veya daha uzun icerikleri olumsuz etkilemez
+        content.setDurationInMinutes(120);
+
         history.setContent(content);
-        history.setWatchedMinutes(120); //izlenilen sureyi de 120 yaptik (120/120 = 1.0 completionRate icin)
+        history.setWatchedMinutes(120);
+        history.setCompletionRate(1.0);
         history.setIsLiked(true);
 
         return history;

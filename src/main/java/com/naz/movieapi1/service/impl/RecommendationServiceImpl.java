@@ -4,7 +4,6 @@ import com.naz.movieapi1.dto.external.WeatherApiResponseDto;
 import com.naz.movieapi1.entity.Content;
 import com.naz.movieapi1.entity.WatchHistory;
 import com.naz.movieapi1.service.RecommendationService;
-import org.hibernate.validator.internal.constraintvalidators.hv.NormalizedValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,11 +39,22 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
         //izlenmemis iceriikler
         Map<Content, Double> scoredContents = new HashMap<>();
-        for (Content content : allContents){
-            if (watchedContentIds.contains(content.getId())){
-                continue; //izlenmisleri atla
+        for (Content content : allContents) {
+
+            if (watchedContentIds.contains(content.getId())) {
+                continue;
             }
-            double score = calculateContentScore(content, userGenreScores, watchHistories, weather);
+            // Kullanıcının izleme geçmişi varsa,
+            // hiç ilgi göstermediği türleri önerilerden çıkar.
+            if (!userGenreScores.isEmpty() && !hasGenreAffinity(content, userGenreScores)) {
+                continue;
+            }
+            double score = calculateContentScore(
+                    content,
+                    userGenreScores,
+                    watchHistories,
+                    weather
+            );
             scoredContents.put(content, score);
         }
         //skorlara gore listeleme ve istenilen limit kadar dongu
@@ -53,6 +63,23 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .limit(limit)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    private boolean hasGenreAffinity(
+            Content content,
+            Map<String, Double> userGenreScores) {
+        if (content.getGenre() == null || content.getGenre().isBlank()) {
+            return false;
+        }
+        String[] genres = content.getGenre().split(",");
+        for (String genre : genres) {
+            String cleanGenre = genre.trim();
+
+            if (userGenreScores.getOrDefault(cleanGenre, 0.0) > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String, Double> calculateGenreAffinity(List<WatchHistory> watchHistories){
