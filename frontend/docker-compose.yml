@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: movie-frontend
+    ports:
+      - "80:80"
+    restart: unless-stopped
