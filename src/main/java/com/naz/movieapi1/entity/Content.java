@@ -50,7 +50,7 @@ public class Content {
     private String country;
     private String awards;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(length = 1000)
     private String Poster;
     @OneToMany(
             mappedBy = "content",

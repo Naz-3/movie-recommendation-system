@@ -1,0 +1,45 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: movie-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: MovieDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: movie-backend
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/MovieDb
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      OMDB_API_KEY: ${OMDB_API_KEY}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+    depends_on:
+      - postgres
+
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
